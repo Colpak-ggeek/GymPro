@@ -1211,9 +1211,11 @@ def cabinet_profile():
 # RUN
 # ──────────────────────────────────────────────────────────────
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    import os
     init_db()
+    port = int(os.environ.get("PORT", 8000))
     print("\n GymPro запущен!")
     print(" Открыть: http://127.0.0.1:5000")
     print(" Вход:    admin@gym.ru / admin123\n")
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=port)
