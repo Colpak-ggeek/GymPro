@@ -20,6 +20,7 @@ app = Flask(__name__)
 app.secret_key = 'gympro_secret_key_2024'
 DB_PATH = 'gym.db'
 
+
 PLANS = {
     'basic':    {'name': 'Базовый',  'price': 2500,
                  'features': ['Тренажёрный зал', '2 групповых занятия/мес', 'Раздевалки']},
@@ -28,6 +29,7 @@ PLANS = {
     'premium':  {'name': 'Премиум',  'price': 7500,
                  'features': ['Всё из Стандарт', '4 персональных/мес', 'Сауна', 'Приоритет записи']},
 }
+
 DAYS  = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 TYPES = ['Силовая', 'Кардио', 'Йога', 'HIIT', 'Пилатес', 'Растяжка', 'Бокс', 'Персональная']
 
@@ -110,6 +112,9 @@ def init_db():
         print("Создан администратор: admin@gym.ru / admin123")
     conn.commit()
     conn.close()
+
+
+init_db()  # вызов при старте сервера
 
 def q(sql, args=(), one=False):
     cur = get_db().execute(sql, args)
@@ -1212,8 +1217,10 @@ def cabinet_profile():
 # ──────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
+    import os
     init_db()
-    print("\n GymPro запущен!")
-    print(" Открыть: http://127.0.0.1:5000")
-    print(" Вход:    admin@gym.ru / admin123\n")
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\n GymPro запущен на порту {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
+
+
