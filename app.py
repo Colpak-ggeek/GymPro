@@ -1,13 +1,3 @@
-"""
-GymPro - Система управления спортзалом
-=======================================
-Установка и запуск:
-  1. pip install flask
-  2. python app.py
-  3. Открыть браузер: http://127.0.0.1:5000
-
-Вход администратора: admin@gym.ru / admin123
-"""
 
 import sqlite3
 from datetime import datetime, timedelta
@@ -34,9 +24,7 @@ PLANS = {
 DAYS  = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 TYPES = ['Силовая', 'Кардио', 'Йога', 'HIIT', 'Пилатес', 'Растяжка', 'Бокс', 'Персональная']
 
-# ──────────────────────────────────────────────────────────────
-# БАЗА ДАННЫХ
-# ──────────────────────────────────────────────────────────────
+
 
 def get_db():
     if 'db' not in g:
@@ -115,7 +103,7 @@ def init_db():
     conn.close()
 
 
-init_db()  # вызов при старте сервера
+init_db() 
 
 def q(sql, args=(), one=False):
     cur = get_db().execute(sql, args)
@@ -126,9 +114,6 @@ def run(sql, args=()):
     db.execute(sql, args)
     db.commit()
 
-# ──────────────────────────────────────────────────────────────
-# ДЕКОРАТОРЫ ДОСТУПА
-# ──────────────────────────────────────────────────────────────
 
 def login_required(f):
     @wraps(f)
@@ -148,9 +133,6 @@ def role_required(*roles):
         return wrap
     return decorator
 
-# ──────────────────────────────────────────────────────────────
-# ОБЩИЕ ШАБЛОНЫ (HTML)
-# ──────────────────────────────────────────────────────────────
 
 CSS = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -244,7 +226,7 @@ def base_layout(content, page_title="", topbar_title=""):
     email= session.get('email','')
     av   = (name[:2].upper()) if name else 'U'
 
-    # nav items per role
+
     if role == 'admin':
         nav = f"""
         <span class="nav-sec">Управление</span>
@@ -271,7 +253,7 @@ def base_layout(content, page_title="", topbar_title=""):
     flashes = ''
     for cat, msg in session.pop('_flashes', []) if False else []:
         pass
-    # use get_flashed_messages via jinja - we'll handle differently
+
     flash_html = '{% with msgs=get_flashed_messages(with_categories=true) %}{% if msgs %}<div class="flash-w">{% for cat,msg in msgs %}<div class="flash {{ "f-ok" if cat=="success" else "f-err" }}">{{msg}}</div>{% endfor %}</div>{% endif %}{% endwith %}'
 
     return f"""<!DOCTYPE html>
@@ -305,9 +287,6 @@ def base_layout(content, page_title="", topbar_title=""):
 def render(content, page_title="", topbar_title=""):
     return render_template_string(base_layout(content, page_title, topbar_title))
 
-# ──────────────────────────────────────────────────────────────
-# AUTH
-# ──────────────────────────────────────────────────────────────
 
 LOGIN_HTML = """<!DOCTYPE html>
 <html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -350,10 +329,7 @@ p{color:var(--mt);font-size:13px;margin-top:5px;}
       Нет аккаунта? <a href="/register" class="link">Зарегистрироваться</a>
     </div>
   </div>
-  <div class="hint">
-    <div class="ht">Демо-вход</div>
-    <div class="hr"><span style="color:var(--mt);">Администратор</span><span style="font-family:'IBM Plex Mono',monospace;color:var(--dm);font-size:11px;">admin@gym.ru / admin123</span></div>
-  </div>
+
 </div>
 </body></html>"""
 
@@ -476,9 +452,6 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# ──────────────────────────────────────────────────────────────
-# ADMIN
-# ──────────────────────────────────────────────────────────────
 
 @app.route('/admin')
 @role_required('admin')
@@ -886,9 +859,7 @@ def admin_subs():
     """
     return render(c, "Абонементы", "Абонементы")
 
-# ──────────────────────────────────────────────────────────────
-# TRAINER
-# ──────────────────────────────────────────────────────────────
+
 
 @app.route('/trainer')
 @role_required('trainer')
@@ -949,9 +920,6 @@ def trainer_workout(wid):
     """
     return render(c, w['name'], "Участники занятия")
 
-# ──────────────────────────────────────────────────────────────
-# CLIENT CABINET
-# ──────────────────────────────────────────────────────────────
 
 @app.route('/cabinet')
 @role_required('client')
@@ -1213,9 +1181,6 @@ def cabinet_profile():
     </div></div>"""
     return render(c, "Профиль", "Мой профиль")
 
-# ──────────────────────────────────────────────────────────────
-# RUN
-# ──────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
     import os
@@ -1223,3 +1188,5 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"\n GymPro запущен на порту {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
+
+
