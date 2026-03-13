@@ -1,14 +1,3 @@
-"""
-GymPro - Система управления спортзалом
-=======================================
-Установка и запуск:
-  1. pip install flask
-  2. python app.py
-  3. Открыть браузер: http://127.0.0.1:5000
-
-Вход администратора: admin@gym.ru / admin123
-"""
-
 import sqlite3
 from datetime import datetime, timedelta
 from functools import wraps
@@ -32,9 +21,7 @@ PLANS = {
 DAYS  = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 TYPES = ['Силовая', 'Кардио', 'Йога', 'HIIT', 'Пилатес', 'Растяжка', 'Бокс', 'Персональная']
 
-# ──────────────────────────────────────────────────────────────
-# БАЗА ДАННЫХ
-# ──────────────────────────────────────────────────────────────
+
 
 def get_db():
     if 'db' not in g:
@@ -124,9 +111,6 @@ def run(sql, args=()):
     db.execute(sql, args)
     db.commit()
 
-# ──────────────────────────────────────────────────────────────
-# ДЕКОРАТОРЫ ДОСТУПА
-# ──────────────────────────────────────────────────────────────
 
 def login_required(f):
     @wraps(f)
@@ -146,9 +130,6 @@ def role_required(*roles):
         return wrap
     return decorator
 
-# ──────────────────────────────────────────────────────────────
-# ОБЩИЕ ШАБЛОНЫ (HTML)
-# ──────────────────────────────────────────────────────────────
 
 CSS = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -242,7 +223,7 @@ def base_layout(content, page_title="", topbar_title=""):
     email= session.get('email','')
     av   = (name[:2].upper()) if name else 'U'
 
-    # nav items per role
+
     if role == 'admin':
         nav = f"""
         <span class="nav-sec">Управление</span>
@@ -303,9 +284,7 @@ def base_layout(content, page_title="", topbar_title=""):
 def render(content, page_title="", topbar_title=""):
     return render_template_string(base_layout(content, page_title, topbar_title))
 
-# ──────────────────────────────────────────────────────────────
-# AUTH
-# ──────────────────────────────────────────────────────────────
+
 
 LOGIN_HTML = """<!DOCTYPE html>
 <html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -471,9 +450,7 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# ──────────────────────────────────────────────────────────────
-# ADMIN
-# ──────────────────────────────────────────────────────────────
+
 
 @app.route('/admin')
 @role_required('admin')
@@ -881,9 +858,9 @@ def admin_subs():
     """
     return render(c, "Абонементы", "Абонементы")
 
-# ──────────────────────────────────────────────────────────────
-# TRAINER
-# ──────────────────────────────────────────────────────────────
+# 
+# 
+# 
 
 @app.route('/trainer')
 @role_required('trainer')
@@ -944,9 +921,8 @@ def trainer_workout(wid):
     """
     return render(c, w['name'], "Участники занятия")
 
-# ──────────────────────────────────────────────────────────────
-# CLIENT CABINET
-# ──────────────────────────────────────────────────────────────
+# 
+
 
 @app.route('/cabinet')
 @role_required('client')
