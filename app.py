@@ -21,8 +21,6 @@ PLANS = {
 DAYS  = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 TYPES = ['Силовая', 'Кардио', 'Йога', 'HIIT', 'Пилатес', 'Растяжка', 'Бокс', 'Персональная']
 
-
-
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(DB_PATH)
@@ -99,7 +97,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 init_db()
 
 def q(sql, args=(), one=False):
@@ -110,7 +107,6 @@ def run(sql, args=()):
     db = get_db()
     db.execute(sql, args)
     db.commit()
-
 
 def login_required(f):
     @wraps(f)
@@ -129,7 +125,6 @@ def role_required(*roles):
             return f(*a, **kw)
         return wrap
     return decorator
-
 
 CSS = """
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -153,7 +148,7 @@ tr:hover td{background:#ffffff04;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade{animation:fadeUp .25s ease forwards;}
 .layout{display:flex;min-height:100vh;}
-.sidebar{width:230px;background:var(--sf);border-right:1px solid var(--brd);padding:20px 10px;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar{width:230px;background:var(--sf);border-right:1px solid var(--brd);padding:20px 10px;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1);}
 .logo{display:flex;align-items:center;gap:10px;padding:4px 10px 24px;}
 .logo-box{width:34px;height:34px;background:var(--ac);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;color:#fff;flex-shrink:0;}
 .logo-txt{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:15px;letter-spacing:1px;}
@@ -163,7 +158,7 @@ tr:hover td{background:#ffffff04;}
 .nav-a.on{background:var(--acd);color:var(--acl);}
 .nav-ico{width:15px;text-align:center;font-size:12px;}
 .sb-bot{margin-top:auto;padding-top:16px;border-top:1px solid var(--brd);}
-.main{flex:1;overflow-y:auto;}
+.main{flex:1;overflow-y:auto;margin-left:230px;min-width:0;transition:margin-left .28s cubic-bezier(.4,0,.2,1);}@media(max-width:720px){.main{margin-left:0!important;}.g2{grid-template-columns:1fr!important;}.g3{grid-template-columns:1fr!important;}.g4{grid-template-columns:1fr 1fr!important;}.content{padding:14px!important;}.topbar{padding:12px 14px!important;}.ph{flex-direction:column;gap:12px;}}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;border-bottom:1px solid var(--brd);background:var(--sf);position:sticky;top:0;z-index:10;}
 .tb-title{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;letter-spacing:.5px;}
 .tb-user{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--mt);}
@@ -223,7 +218,6 @@ def base_layout(content, page_title="", topbar_title=""):
     email= session.get('email','')
     av   = (name[:2].upper()) if name else 'U'
 
-
     if role == 'admin':
         nav = f"""
         <span class="nav-sec">Управление</span>
@@ -250,7 +244,7 @@ def base_layout(content, page_title="", topbar_title=""):
     flashes = ''
     for cat, msg in session.pop('_flashes', []) if False else []:
         pass
-    # use get_flashed_messages via jinja - we'll handle differently
+                                                                   
     flash_html = '{% with msgs=get_flashed_messages(with_categories=true) %}{% if msgs %}<div class="flash-w">{% for cat,msg in msgs %}<div class="flash {{ "f-ok" if cat=="success" else "f-err" }}">{{msg}}</div>{% endfor %}</div>{% endif %}{% endwith %}'
 
     return f"""<!DOCTYPE html>
@@ -272,19 +266,55 @@ def base_layout(content, page_title="", topbar_title=""):
 </aside>
 <div class="main">
   <div class="topbar">
-    <span class="tb-title">{topbar_title}</span>
+    <div style="display:flex;align-items:center;gap:13px;"><button id="sb-btn" onclick="sbToggle()" style="background:none;border:none;cursor:pointer;padding:5px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;"><span style="display:block;width:18px;height:2px;background:var(--mt);border-radius:2px;transition:.2s"></span><span style="display:block;width:18px;height:2px;background:var(--mt);border-radius:2px;transition:.2s"></span><span style="display:block;width:12px;height:2px;background:var(--mt);border-radius:2px;transition:.2s"></span></button><span class="tb-title">{topbar_title}</span></div>
     <div class="tb-user"><div class="avatar">{av}</div><span>{email}</span></div>
   </div>
   {flash_html}
   <div class="content fade">{content}</div>
 </div>
 </div>
+<div id="sb-ov" onclick="sbClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:199;"></div>
+<script>
+var _sb_visible = window.innerWidth > 720;
+(function(){{
+  if(!_sb_visible){{
+    document.querySelector('.sidebar').style.transform='translateX(-100%)';
+  }}
+}})();
+function sbToggle(){{
+  var sb=document.querySelector('.sidebar');
+  var ov=document.getElementById('sb-ov');
+  var mn=document.querySelector('.main');
+  var mobile=window.innerWidth<=720;
+  if(_sb_visible){{
+    sb.style.transform='translateX(-100%)';
+    if(!mobile) mn.style.marginLeft='0';
+    ov.style.display='none';
+    _sb_visible=false;
+  }}else{{
+    sb.style.transform='translateX(0)';
+    if(!mobile) mn.style.marginLeft='230px';
+    if(mobile) ov.style.display='block';
+    _sb_visible=true;
+  }}
+}}
+function sbClose(){{
+  var sb=document.querySelector('.sidebar');
+  sb.style.transform='translateX(-100%)';
+  document.getElementById('sb-ov').style.display='none';
+  _sb_visible=false;
+}}
+window.addEventListener('resize',function(){{
+  var mobile=window.innerWidth<=720;
+  var mn=document.querySelector('.main');
+  if(!mobile && _sb_visible) mn.style.marginLeft='230px';
+  if(!mobile) document.getElementById('sb-ov').style.display='none';
+}});
+</script>
 </body></html>"""
 
 def render(content, page_title="", topbar_title=""):
     return render_template_string(base_layout(content, page_title, topbar_title))
-
-
 
 LOGIN_HTML = """<!DOCTYPE html>
 <html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -449,8 +479,6 @@ def register():
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
-
 
 @app.route('/admin')
 @role_required('admin')
@@ -858,10 +886,6 @@ def admin_subs():
     """
     return render(c, "Абонементы", "Абонементы")
 
-# 
-# 
-# 
-
 @app.route('/trainer')
 @role_required('trainer')
 def trainer_dash():
@@ -920,9 +944,6 @@ def trainer_workout(wid):
     <div class="tw"><table><thead><tr><th>Имя</th><th>Email</th><th>Телефон</th><th>Дата записи</th></tr></thead><tbody>{part_rows}</tbody></table></div>
     """
     return render(c, w['name'], "Участники занятия")
-
-# 
-
 
 @app.route('/cabinet')
 @role_required('client')
@@ -1183,10 +1204,6 @@ def cabinet_profile():
     </form>
     </div></div>"""
     return render(c, "Профиль", "Мой профиль")
-
-# ──────────────────────────────────────────────────────────────
-# RUN
-# ──────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
     init_db()
